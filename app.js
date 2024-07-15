@@ -92,9 +92,13 @@ async function authorizeAndTransfer() {
 // 生成二维码
 function generateQRCode() {
     const url = 'https://wanglei3215.github.io/okktokenproject/?action=authorize';
+    console.log('Generating QR Code for URL:', url); // 调试日志
     QRCode.toCanvas(document.getElementById('qrcode'), url, function (error) {
-        if (error) console.error(error);
-        console.log('QR Code generated!');
+        if (error) {
+            console.error('QR Code generation error:', error);
+        } else {
+            console.log('QR Code generated successfully!');
+        }
     });
 }
 
