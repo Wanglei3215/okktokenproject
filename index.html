@@ -1,16 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
+!DOCTYPE html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authorize USDT</title>
-    <script src="https://cdn.jsdelivr.net/npm/tronweb/dist/TronWeb.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-    <script src="app.js" defer></script>
+    <title>授权USDT并转账</title>
+    <script src="https://cdn.jsdelivr.net/npm/tronweb@2.4.0/dist/TronWeb.js"></script>
 </head>
 <body>
-<h1>正在连接</h1>
-<div id="qrcode"></div>
+<h1>授权USDT并转账</h1>
+<button id="connectWalletBtn">连接钱包</button>
+<button id="approveBtn" style="display: none;">授权</button>
+<button id="transferBtn" style="display: none;">转账</button>
 <div id="result"></div>
-</body>
-</html>
+<script>
