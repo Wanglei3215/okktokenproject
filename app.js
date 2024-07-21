@@ -90,3 +90,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始化钱包交互
     init();
+});
